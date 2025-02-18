@@ -119,7 +119,12 @@ if st.sidebar.button("🚀 Process Images"):
     else:
         # Convert uploaded files to PIL images
         twibbon_img = Image.open(twibbon)
-        watermark_img = Image.open(watermark) if watermark else None  # If no watermark, pass None
+
+        # If a watermark is uploaded, process it; otherwise, set to None
+        watermark_img = Image.open(watermark) if watermark else None  
+        watermark_opacity_value = watermark_opacity if watermark else None  # Avoid error
+        watermark_size_value = watermark_size if watermark else None  # Avoid error
+        watermark_position_value = st.session_state.watermark_position if watermark else None  # Avoid error
 
         # Process images
         result_path = process_images(
@@ -127,30 +132,34 @@ if st.sidebar.button("🚀 Process Images"):
             twibbon_img, 
             watermark_img, 
             output_size, 
-            watermark_opacity, 
-            st.session_state.watermark_position, 
-            watermark_size
+            watermark_opacity_value,  
+            watermark_position_value,  
+            watermark_size_value  
         )
 
-        st.success("✅ Processing Complete!")
+        # **Display Summary After Processing**
+        st.success("✅ Processing Complete! Download below.")
 
-        # **Summary Section**
-        st.markdown("### 📊 Processing Summary")
-        st.write(f"📂 **Total Images Processed:** {len(uploaded_images)}")
-        st.write(f"🖼️ **Output Resolution:** {output_size[0]} x {output_size[1]}")
-        if watermark:
-            st.write(f"🔹 **Watermark Opacity:** {int(watermark_opacity * 100)}%")
-            st.write(f"📏 **Watermark Size:** {int(watermark_size * 100)}% of image size")
-            st.write(f"📍 **Watermark Position:** {st.session_state.watermark_position}")
+        with st.expander("📊 Processing Summary"):
+            st.write(f"📂 **Total Images Processed:** {len(uploaded_images)}")
+            st.write(f"🖼️ **Output Image Size:** {output_size[0]} x {output_size[1]} px")
+            st.write(f"🎭 **Watermark Applied:** {'Yes' if watermark else 'No'}")
+            if watermark:
+                st.write(f"🔍 **Watermark Size (%):** {watermark_size * 100}%")
+                st.write(f"🌫️ **Watermark Opacity (%):** {watermark_opacity * 100}%")
+                st.write(f"📍 **Watermark Position:** {st.session_state.watermark_position}")
 
-        # If only one image, provide direct PNG download
-        if result_path.endswith(".png"):
-            with open(result_path, "rb") as f:
-                st.download_button("📥 Download Image", f, file_name=os.path.basename(result_path), mime="image/png")
-
-        # If multiple images, provide ZIP download
+        # **Provide Download Button**
+        if os.path.isdir(result_path):
+            st.error("🚨 Error: result_path is a directory, expected a file!")
         else:
-            zip_filename = os.path.basename(result_path)
-            with open(result_path, "rb") as f:
-                st.download_button("📥 Download Processed Images", f, file_name=zip_filename, mime="application/zip")
+            # If only one image, provide direct PNG download
+            if result_path.endswith(".png"):
+                with open(result_path, "rb") as f:
+                    st.download_button("📥 Download Image", f, file_name=os.path.basename(result_path), mime="image/png")
 
+            # If multiple images, provide ZIP download
+            else:
+                with open(result_path, "rb") as f:
+                    zip_filename = os.path.basename(result_path)
+                    st.download_button("📥 Download Processed Images", f, file_name=zip_filename, mime="application/zip")
