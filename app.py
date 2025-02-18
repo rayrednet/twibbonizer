@@ -15,17 +15,40 @@ st.write(
     "Easily add a **twibbon** and **watermark** to multiple images at once! "
     "Upload your product images, select your templates, and adjust settings before downloading the processed images."
 )
-st.warning("⚠️ **Note:** Twibbon must have a transparent background (PNG format).")
+st.warning("⚠️ **Note:** Twibbon and Watermark must have a transparent background (PNG format).")
 st.info("ℹ️ Watermark is optional! You can leave it empty if you don't want to apply one.")
 
-# Upload Twibbon & Watermark
-st.sidebar.header("📌 Upload Templates")
-twibbon = st.sidebar.file_uploader("Upload Twibbon (PNG, Required)", type=["png"])
-watermark = st.sidebar.file_uploader("Upload Watermark (PNG, Optional)", type=["png"])
+# **Helper Function for File Upload with Preview**
+def file_uploader_with_preview(label, file_types, key, multiple=False):
+    """Creates a file uploader with an inline preview after upload."""
+    uploaded_files = st.sidebar.file_uploader(label, type=file_types, key=key, accept_multiple_files=multiple)
 
-# Upload Images
+    if uploaded_files:
+        if multiple:
+            st.sidebar.markdown("#### Image Previews")
+            for file in uploaded_files:
+                col1, col2 = st.sidebar.columns([3, 1])  # File uploader (left) + Preview (right)
+                with col1:
+                    st.write(f"📷 {file.name}")
+                with col2:
+                    st.image(Image.open(file), width=50)  # Small inline preview
+        else:
+            col1, col2 = st.sidebar.columns([3, 1])  # File uploader (left) + Preview (right)
+            with col1:
+                st.write(f"✅ Uploaded: {uploaded_files.name}")
+            with col2:
+                st.image(Image.open(uploaded_files), width=50)  # Small inline preview
+
+    return uploaded_files
+
+# **Twibbon & Watermark Upload**
+st.sidebar.header("📌 Upload Templates")
+twibbon = file_uploader_with_preview("Upload Twibbon (PNG, Required)", ["png"], "twibbon")
+watermark = file_uploader_with_preview("Upload Watermark (PNG, Optional)", ["png"], "watermark")
+
+# **Product Image Upload**
 st.sidebar.header("📌 Upload Product Images")
-uploaded_images = st.sidebar.file_uploader("Upload Images (JPG, PNG, WEBP)", type=["jpg", "png", "webp"], accept_multiple_files=True)
+uploaded_images = file_uploader_with_preview("Upload Images (JPG, PNG, WEBP)", ["jpg", "png", "webp"], "product_images", multiple=True)
 
 # Image Size Settings
 st.sidebar.header("📌 Output Image Settings")
@@ -105,18 +128,29 @@ if st.sidebar.button("🚀 Process Images"):
             watermark_img, 
             output_size, 
             watermark_opacity, 
-            st.session_state.watermark_position,  # Ensure persistent position is used
+            st.session_state.watermark_position, 
             watermark_size
         )
+
+        st.success("✅ Processing Complete!")
+
+        # **Summary Section**
+        st.markdown("### 📊 Processing Summary")
+        st.write(f"📂 **Total Images Processed:** {len(uploaded_images)}")
+        st.write(f"🖼️ **Output Resolution:** {output_size[0]} x {output_size[1]}")
+        if watermark:
+            st.write(f"🔹 **Watermark Opacity:** {int(watermark_opacity * 100)}%")
+            st.write(f"📏 **Watermark Size:** {int(watermark_size * 100)}% of image size")
+            st.write(f"📍 **Watermark Position:** {st.session_state.watermark_position}")
 
         # If only one image, provide direct PNG download
         if result_path.endswith(".png"):
             with open(result_path, "rb") as f:
-                st.success("✅ Processing Complete! Download your image below.")
                 st.download_button("📥 Download Image", f, file_name=os.path.basename(result_path), mime="image/png")
 
         # If multiple images, provide ZIP download
         else:
+            zip_filename = os.path.basename(result_path)
             with open(result_path, "rb") as f:
-                st.success("✅ Processing Complete! Download your ZIP file below.")
-                st.download_button("📥 Download Processed Images", f, file_name="processed_images.zip", mime="application/zip")
+                st.download_button("📥 Download Processed Images", f, file_name=zip_filename, mime="application/zip")
+
