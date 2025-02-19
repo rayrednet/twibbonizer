@@ -2,6 +2,9 @@
 
 Easily add a **twibbon** and **watermark** to multiple images at once! 🎨✨
 
+## ❓ What is a Twibbon?
+A **twibbon** is a **transparent overlay** that people add to their profile pictures or images to show support for a cause, campaign, or branding. Twibbonizer helps you easily apply twibbons to multiple images with optional watermarking.
+
 ## 🌟 Features
 - **Batch Processing:** Upload multiple images and apply the twibbon/watermark in one go.
 - **Customizable Output:** Adjust output resolution, watermark opacity, size, and position.
@@ -12,10 +15,10 @@ Easily add a **twibbon** and **watermark** to multiple images at once! 🎨✨
 - **Streamlit UI:** Simple, fast, and easy-to-use interface.
 - **Cloud Hosted:** Runs on Streamlit Community Cloud for instant online access.
 
-
 ## 🚀 Live Demo
 Try it here: [Twibbonizer on Streamlit](https://twibbonizer.streamlit.app/)
 
+🎥 **Watch the Demo Video:** [YouTube Link](https://youtu.be/QgeiMd0JXS0)
 
 ## 📌 How to Use
 ### 1️⃣ Upload Files
@@ -35,7 +38,6 @@ Try it here: [Twibbonizer on Streamlit](https://twibbonizer.streamlit.app/)
 - Click **"🚀 Process Images"**
 - View the **summary report** (processed images, settings used, etc.)
 - Download the processed **PNG** (single image) or **ZIP file** (multiple images)
-
 
 ## 🛠️ Installation (For Local Development)
 Clone the repository and install dependencies:
